@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+#
+#  This command prints AST hashes for supplied classes or modules, main purpose is to
+#  find out current hash of specific class for implementing loaders and
+#  dumpers
+#
+from typing import Sequence
+
+import importlib
+import click
+
+from charon.testing.ast_hash import ASTHash
+
+
+
+@click.command()
+@click.argument('classes', nargs=-1)
+def main(classes : Sequence[str]):
+	'''
+	This command prints AST hashes for supplied classes or modules,
+	main purpose is to find out current hash of specific class for implementing loaders and dumpers
+	'''
+	for cls in classes:
+		if '.' in cls:
+			module_name, class_name = cls.rsplit('.', 1)
+
+			module = importlib.import_module(module_name)
+			dest_def = getattr(module, class_name)
+		else:
+			if hasattr(__builtins__, cls):
+				raise ValueError("Class or module '{cls}' are from builtin which is not supported".format(cls = cls))
+
+			dest_def = importlib.import_module(cls)
+
+		cls_hash = ASTHash.get_hash(dest_def)
+		click.echo('{cls}: {cls_hash}'.format(cls = cls, cls_hash = cls_hash))
+
+
+if __name__ == '__main__':
+	main()

@@ -1,0 +1,5 @@
+include version.txt
+include charon/codec.c
+include charon/codec_registry.c
+include charon/extensions/standard_registry.c
+
